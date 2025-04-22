@@ -1,0 +1,9 @@
+Log started at 21.04.2025 6:22:50
+[06:22:50.609] CreepyFogEffect: Log file initialized at C:\Users\user\Games\game\CreepyFogDebug_20250421_062250.log
+[06:22:50.610] CreepyFogEffect: InitMaterial called
+[06:22:50.610] CreepyFogEffect: Shader 'Hidden/CreepyFog' found successfully
+[06:22:50.610] CreepyFogEffect: Material already exists
+[06:22:50.610] CreepyFogEffect: Using Built-in Render Pipeline
+[06:22:50.611] CreepyFogEffect: OnEnable called. GameObject: Main Camera, IsActive: True
+[06:22:51.686] CreepyFogEffect: Material destroyed
+Log ended at 21.04.2025 6:22:51
