@@ -1,6 +1,6 @@
 using UnityEngine;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
 
 public class WeatherController : MonoBehaviour
 {
@@ -12,7 +12,12 @@ public class WeatherController : MonoBehaviour
     [SerializeField] private Transform playerTransform;
     [SerializeField] private float particleHeightOffset = 10f;
     [SerializeField] private Vector3 particleSystemSize = new Vector3(50f, 1f, 50f);
-    [SerializeField] private float transitionDuration = 2f; // 2 секунды переход
+    [SerializeField] private float transitionDuration = 2f;
+
+    [Header("Настройки звука дождя")]
+    [SerializeField] private AudioClip rainAudioClip;
+    [SerializeField] [Range(0f, 1f)] private float maxRainVolume = 0.5f;
+    [SerializeField] private float audioTransitionSpeed = 2f;
 
     private ParticleSystem currentWeatherSystem;
     private WeatherZone currentZone;
@@ -20,6 +25,9 @@ public class WeatherController : MonoBehaviour
     private float targetIntensity = 0f;
     private float currentIntensity = 0f;
     private Coroutine transitionCoroutine;
+    private AudioSource rainAudioSource;
+    private float targetVolume = 0f;
+    private float currentVolume = 0f;
 
     private void Awake()
     {
@@ -28,6 +36,13 @@ public class WeatherController : MonoBehaviour
             { WeatherZone.WeatherType.Rain, rainPrefab },
             { WeatherZone.WeatherType.Snow, snowPrefab }
         };
+
+        rainAudioSource = gameObject.AddComponent<AudioSource>();
+        rainAudioSource.clip = rainAudioClip;
+        rainAudioSource.loop = true;
+        rainAudioSource.spatialBlend = 0f;
+        rainAudioSource.playOnAwake = false;
+        rainAudioSource.volume = 0f;
     }
 
     private void Update()
@@ -37,6 +52,8 @@ public class WeatherController : MonoBehaviour
             currentWeatherSystem.transform.position = playerTransform.position + Vector3.up * particleHeightOffset;
             UpdateParticleEmission();
         }
+
+        UpdateRainAudio();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -77,8 +94,20 @@ public class WeatherController : MonoBehaviour
         GameObject weatherObj = Instantiate(prefab, playerTransform.position + Vector3.up * particleHeightOffset, Quaternion.identity);
         currentWeatherSystem = weatherObj.GetComponent<ParticleSystem>();
 
+        ParticleSystemRenderer renderer = currentWeatherSystem.GetComponent<ParticleSystemRenderer>();
+        if (renderer != null)
+        {
+            renderer.material.renderQueue = 3100;  
+        }
+
         var shape = currentWeatherSystem.shape;
         shape.scale = particleSystemSize;
+
+        targetVolume = (zone.GetWeatherType() == WeatherZone.WeatherType.Rain) ? maxRainVolume * zone.GetIntensity() : 0f;
+        if (zone.GetWeatherType() == WeatherZone.WeatherType.Rain && !rainAudioSource.isPlaying)
+        {
+            rainAudioSource.Play();
+        }
 
         transitionCoroutine = StartCoroutine(TransitionWeather(zone.GetIntensity()));
     }
@@ -89,6 +118,7 @@ public class WeatherController : MonoBehaviour
             StopCoroutine(transitionCoroutine);
 
         currentZone = null;
+        targetVolume = 0f;
         transitionCoroutine = StartCoroutine(TransitionWeather(0f));
     }
 
@@ -108,11 +138,16 @@ public class WeatherController : MonoBehaviour
 
         currentIntensity = targetIntensity;
         UpdateParticleEmission();
-        
+
         if (currentIntensity == 0f && currentWeatherSystem)
         {
             Destroy(currentWeatherSystem.gameObject);
             currentWeatherSystem = null;
+        }
+
+        if (currentIntensity == 0f && rainAudioSource.isPlaying)
+        {
+            StartCoroutine(FadeOutAudio());
         }
     }
 
@@ -125,6 +160,26 @@ public class WeatherController : MonoBehaviour
             ? (currentZone.GetWeatherType() == WeatherZone.WeatherType.Rain ? 200f : 100f)
             : 0f;
         emission.rateOverTime = currentIntensity * maxRate;
+    }
+
+    private void UpdateRainAudio()
+    {
+        if (!rainAudioSource) return;
+
+        currentVolume = Mathf.Lerp(currentVolume, targetVolume, Time.deltaTime * audioTransitionSpeed);
+        rainAudioSource.volume = currentVolume;
+        rainAudioSource.transform.position = playerTransform.position;
+    }
+
+    private IEnumerator FadeOutAudio()
+    {
+        while (rainAudioSource.volume > 0.01f)
+        {
+            rainAudioSource.volume = Mathf.Lerp(rainAudioSource.volume, 0f, Time.deltaTime * audioTransitionSpeed);
+            yield return null;
+        }
+        rainAudioSource.Stop();
+        rainAudioSource.volume = 0f;
     }
 
     public WeatherZone.WeatherType GetCurrentWeatherType() => currentZone ? currentZone.GetWeatherType() : WeatherZone.WeatherType.None;

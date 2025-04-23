@@ -3,6 +3,13 @@ Shader "Hidden/CreepyFog"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+        _UITex ("UI Texture", 2D) = "black" {}
+        _Intensity ("Fog Intensity", Range(0, 1)) = 0.75
+        _FogColor ("Fog Color", Color) = (0.12, 0.18, 0.22, 1)
+        _Density ("Fog Density", Range(0.03, 0.12)) = 0.07
+        _SwirlScale ("Swirl Scale", Range(0.3, 1.2)) = 0.7
+        _SwirlSpeed ("Swirl Speed", Vector) = (0.25, 0.25, 0, 0)
+        _WeatherIntensity ("Weather Intensity", Range(0, 1)) = 0
     }
     SubShader
     {
@@ -14,6 +21,7 @@ Shader "Hidden/CreepyFog"
             #include "UnityCG.cginc"
 
             sampler2D _MainTex;
+            sampler2D _UITex; 
             sampler2D _CameraDepthTexture;
             float _Intensity;
             float4 _FogColor;
@@ -52,20 +60,35 @@ Shader "Hidden/CreepyFog"
             float4 frag(v2f i) : SV_Target
             {
                 float2 uv = i.uv;
-                float2 swirlUV = uv * _SwirlScale + _SwirlSpeed * _Time.y;
-                float noise = SimpleNoise(swirlUV);
-                uv += noise * 0.02;
 
-                float weatherNoise = SimpleNoise(uv + _Time.y * 0.5) * _WeatherIntensity * 0.05;
+                float depth = LinearEyeDepth(tex2Dproj(_CameraDepthTexture, UNITY_PROJ_COORD(i.screenPos)).r);
+                float depthFactor = saturate(depth * 0.05);
+                float2 swirlUV = uv * _SwirlScale + _SwirlSpeed * _Time.y;
+                float noise = SimpleNoise(swirlUV) * depthFactor;
+
+                float distortion = noise * 0.015 * depthFactor;
+                uv += float2(distortion, distortion);
+
+                float weatherNoise = SimpleNoise(uv + _Time.y * 0.5) * _WeatherIntensity * 0.03 * depthFactor;
                 uv += weatherNoise;
 
                 float4 col = tex2D(_MainTex, uv);
-                float depth = LinearEyeDepth(tex2Dproj(_CameraDepthTexture, UNITY_PROJ_COORD(i.screenPos)).r);
-                float fogFactor = exp(-_Density * depth);
+
+                float luminance = dot(col.rgb, float3(0.299, 0.587, 0.114));
+                float brightnessMod = saturate(1.0 - luminance * 0.5); 
+
+                float fogFactor = 1.0 - exp(-_Density * depth * depth);
+                fogFactor *= brightnessMod; 
 
                 float4 fog = _FogColor;
-                fog.a = _Intensity * (1.0 + noise * 0.4 + _WeatherIntensity * 0.1); 
-                return lerp(col, fog, fog.a * (1.0 - fogFactor));
+                fog.a = _Intensity * (1.0 + noise * 0.3 + _WeatherIntensity * 0.1);
+
+                float4 finalColor = lerp(col, fog, fog.a * fogFactor);
+
+                float4 uiColor = tex2D(_UITex, i.uv);
+                finalColor = lerp(finalColor, uiColor, uiColor.a);
+
+                return finalColor;
             }
             ENDCG
         }

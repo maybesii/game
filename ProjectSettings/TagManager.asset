@@ -5,16 +5,18 @@ TagManager:
   serializedVersion: 2
   tags:
   - WeatherZone
+  - HorrorZone
+  - Puddle
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - dirt
   - Water
   - UI
-  - 
-  - 
-  - 
+  - Puddle
+  - UIOverlay
+  - Interactable
   - 
   - 
   - 
@@ -39,6 +41,9 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: UIOverlay
+    uniqueID: 2179903985
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0
