@@ -69,7 +69,7 @@ Shader "Hidden/CreepyFog"
                 float distortion = noise * 0.015 * depthFactor;
                 uv += float2(distortion, distortion);
 
-                float weatherNoise = SimpleNoise(uv + _Time.y * 0.5) * _WeatherIntensity * 0.03 * depthFactor;
+                float weatherNoise = SimpleNoise(uv + _Time.y * 0.5) * _WeatherIntensity * 0.01 * depthFactor; // Уменьшено с 0.03 до 0.01
                 uv += weatherNoise;
 
                 float4 col = tex2D(_MainTex, uv);
@@ -81,7 +81,7 @@ Shader "Hidden/CreepyFog"
                 fogFactor *= brightnessMod; 
 
                 float4 fog = _FogColor;
-                fog.a = _Intensity * (1.0 + noise * 0.3 + _WeatherIntensity * 0.1);
+                fog.a = _Intensity * (1.0 + noise * 0.3 + _WeatherIntensity * 0.05); // Уменьшено с 0.1 до 0.05
 
                 float4 finalColor = lerp(col, fog, fog.a * fogFactor);
 

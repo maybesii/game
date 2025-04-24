@@ -1,4 +1,5 @@
 using UnityEngine;
+using HorrorGame;
 
 public class PlayerMovement : MonoBehaviour
 {
