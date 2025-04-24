@@ -11,11 +11,11 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - dirt
+  - UIOverlay
   - Water
   - UI
   - Puddle
-  - UIOverlay
+  - dirt
   - Interactable
   - 
   - 
