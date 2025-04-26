@@ -15,8 +15,8 @@ namespace HorrorGame
         [SerializeField] private float particleHeightOffset = 10f;
         [SerializeField] private Vector3 particleSystemSize = new Vector3(50f, 1f, 50f);
         [SerializeField] private float transitionDuration = 2f;
-        [SerializeField] private float maxParticleSize = 0.1f; // Новое поле для ограничения размера частиц
-        [SerializeField] private CreepyFogEffect creepyFogEffect; // Связь с туманом
+        [SerializeField] private float maxParticleSize = 0.1f;
+        [SerializeField] private CreepyFogEffect creepyFogEffect;
 
         [Header("Настройки звука дождя")]
         [SerializeField] private AudioClip rainAudioClip;
@@ -110,7 +110,7 @@ namespace HorrorGame
             shape.scale = particleSystemSize;
 
             var main = currentWeatherSystem.main;
-            main.startSize = maxParticleSize; // Устанавливаем начальный размер частиц
+            main.startSize = maxParticleSize;
 
             targetVolume = (zone.GetWeatherType() == WeatherZone.WeatherType.Rain) ? maxRainVolume * zone.GetIntensity() : 0f;
             if (zone.GetWeatherType() == WeatherZone.WeatherType.Rain && !rainAudioSource.isPlaying)

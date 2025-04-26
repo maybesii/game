@@ -26,8 +26,8 @@ namespace HorrorGame
 
         [Header("Интеграция с погодой")]
         [SerializeField] private WeatherController weatherController;
-        [SerializeField] private float rainIntensityBoost = 0.1f; // Уменьшено с 0.2 до 0.1
-        [SerializeField] private float snowIntensityBoost = 0.05f; // Уменьшено с 0.1 до 0.05
+        [SerializeField] private float rainIntensityBoost = 0.1f;
+        [SerializeField] private float snowIntensityBoost = 0.05f;
         [SerializeField] private float weatherLerpSpeed = 0.5f;
 
         [Header("UI Render Texture")]
@@ -127,7 +127,7 @@ namespace HorrorGame
             material.SetColor("_FogColor", fogColor);
             material.SetFloat("_SwirlScale", swirlScale);
             material.SetVector("_SwirlSpeed", swirlSpeed);
-            material.SetFloat("_WeatherIntensity", weatherController ? weatherController.GetCurrentWeatherIntensity() * 0.5f : 0f); // Уменьшено влияние
+            material.SetFloat("_WeatherIntensity", weatherController ? weatherController.GetCurrentWeatherIntensity() * 0.5f : 0f);
 
             if (uiRenderTexture != null)
             {

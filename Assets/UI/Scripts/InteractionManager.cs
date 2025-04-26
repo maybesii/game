@@ -29,9 +29,9 @@ namespace HorrorGame
         [Header("Echo Settings")]
         [SerializeField] private float echoDelay = 0.3f;
         [SerializeField] private int echoCount = 3;
-        [SerializeField] private float echoVolumeReduction = 0.2f; // Уменьшено с 0.3 до 0.2
+        [SerializeField] private float echoVolumeReduction = 0.2f;
         [SerializeField] private float pitchVariation = 0.2f;
-        [SerializeField] private float initialEchoVolume = 0.5f; // Новое поле для начальной громкости эха
+        [SerializeField] private float initialEchoVolume = 0.5f;
 
         private void Awake()
         {
@@ -122,7 +122,6 @@ namespace HorrorGame
                 return;
             }
 
-            // Проигрываем horrorWhisperClip при взаимодействии
             PlayHoverSound(horrorWhisperClip);
 
             if (config.interactSound != null)
@@ -245,7 +244,6 @@ namespace HorrorGame
         {
             isPlayingEcho = true;
 
-            // Сохраняем начальную позицию объекта
             Vector3 soundPosition = currentPoint != null ? currentPoint.transform.position : transform.position;
 
             audioSource.pitch = Random.Range(1f - pitchVariation, 1f + pitchVariation);
